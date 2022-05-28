@@ -74,15 +74,15 @@ async def search_items(keyword: str):
     # Inner JOIN is advised by yuting0203 and reference to LingYi0612
     c.execute(sql+"WHERE items.name LIKE "+ "'%"+keyword+"%'")
     # list comprehension is reference to LingYi0612
-    r_name = [dict((c.description[i][0], value)
+
+    r = [dict((c.description[i][0], value)
                   for i, value in enumerate(row)) for row in c.fetchall()]
     
     c.execute(sql+"WHERE category LIKE "+ "'%"+keyword+"%'")
-    r_category = [dict((c.description[i][0], value)
-                  for i, value in enumerate(row)) for row in c.fetchall()]
-
-    if len(r_name+r_category)>0:
-        return (f"items:{r_name+r_category}")
+    r.extend([dict(((c.description[i][0], value)
+                  for i, value in enumerate(row))) for row in c.fetchall()])
+    if len(r)>0:
+        return {"items":r}
     else:return("Sorry items are not found, please search for keyword name or category ")
 
 @app.get("/items/{item_id}")

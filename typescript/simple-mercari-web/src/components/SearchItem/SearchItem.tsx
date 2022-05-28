@@ -11,10 +11,17 @@ const server = process.env.API_URL || 'http://127.0.0.1:9000';
 
 const placeholderImage = process.env.PUBLIC_URL + '/logo192.png';
 
-export const ItemList: React.FC<{}> = () => {
+export const SearchItem: React.FC<{}> = () => {
   const [items, setItems] = useState<Item[]>([])
-  const fetchItems = () => {
-    fetch(server.concat('/items'),
+  const [keyword, setKeyword] = useState("")
+  
+  const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setKeyword(event.target.value);
+};
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    let url = server.concat('/search') + "?keyword="+keyword;
+    fetch(url,
     {
       method: 'GET',
       mode: 'cors',
@@ -23,6 +30,7 @@ export const ItemList: React.FC<{}> = () => {
         'Accept': 'application/json'
       },
     })
+    
       .then(response => response.json())
       .then(data => {
         console.log('GET success:',data.items);
@@ -33,18 +41,19 @@ export const ItemList: React.FC<{}> = () => {
         console.error('GET error:',error)
       })
   }
-
-  useEffect(() => {
-    fetchItems();
-  }, []);
   
   return (
     <div style={{ backgroundColor: '#222427' }}>
-      <h1>All items</h1>
+        <h1>Search items</h1>
+        <form onSubmit={onSubmit}>
+        <div>
+            <input type='text' name='keyword' id='keyword' placeholder='search with item name or category keyword' onChange={onChange} required/> 
+            <button type='submit'>search</button>
+        </div>
+      </form>
       { items.map((item) => {
         return (
           <div key={item.id} className='ItemList' >
-            {/* TODO: Task 1: Replace the placeholder image with the item image */}
             <img  style={{ width: '50%' }} src={server.concat(`/image/${item.image}`)} alt={item.name} />
             <p>
             <span >Name: {item.name}</span>
