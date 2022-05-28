@@ -3,8 +3,11 @@ import logging
 import pathlib
 import sqlite3
 import hashlib
+import io
 from PIL import ImageFilter
-from fastapi import FastAPI, Form, HTTPException, UploadFile,File
+from PIL import Image
+import base64
+from fastapi import FastAPI, Form, HTTPException, UploadFile,File, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -71,15 +74,15 @@ async def search_items(keyword: str):
     # Inner JOIN is advised by yuting0203 and reference to LingYi0612
     c.execute(sql+"WHERE items.name LIKE "+ "'%"+keyword+"%'")
     # list comprehension is reference to LingYi0612
-    r_name = [dict((c.description[i][0], value)
+
+    r = [dict((c.description[i][0], value)
                   for i, value in enumerate(row)) for row in c.fetchall()]
     
     c.execute(sql+"WHERE category LIKE "+ "'%"+keyword+"%'")
-    r_category = [dict((c.description[i][0], value)
-                  for i, value in enumerate(row)) for row in c.fetchall()]
-
-    if len(r_name+r_category)>0:
-        return (f"items:{r_name+r_category}")
+    r.extend([dict(((c.description[i][0], value)
+                  for i, value in enumerate(row))) for row in c.fetchall()])
+    if len(r)>0:
+        return {"items":r}
     else:return("Sorry items are not found, please search for keyword name or category ")
 
 @app.get("/items/{item_id}")
@@ -96,9 +99,16 @@ def get_by_id(item_id: int):
     except:
         return("This index has no related item. Please input another index.")
 
+def resize_image(filename: str):
+
+    image = Image.open(filename, mode="r")
+    # logger.info(type(image)) #<class 'PIL.JpegImagePlugin.JpegImageFile'>
+    image = image.resize((256,256))
+    # image = image.filter(ImageFilter.EDGE_ENHANCE)
+    image.save(filename)
 
 @app.post("/items")
-def add_item(name: str = Form(...), category: str = Form(...), image: UploadFile = File(...)):
+async def add_item(background_tasks: BackgroundTasks, name: str = Form(...), category: str = Form(...), image: UploadFile = File(...)):
     conn = sqlite3.connect('mercari.sqlite3')
     c = conn.cursor()
     
@@ -115,12 +125,11 @@ def add_item(name: str = Form(...), category: str = Form(...), image: UploadFile
 
         with open(file_location, 'wb+') as file_object:  
             file_object.write(image.file.read())
-        # img = Image.open(f".\\image\\{hashed_image_path}")
-        # img= img.filter(ImageFilter.EDGE_ENHANCE)
-        # with open(file_location, 'wb+') as file_object:  
-        #     file_object.write(img)
+            file_object.close()
+            logger.info({"info": f"file '{image.filename}' saved at '{file_location}'"})
 
-        logger.info({"info": f"file '{image.filename}' saved at '{file_location}'"})
+        background_tasks.add_task(resize_image, filename=file_location)
+
         c.execute("""INSERT INTO items VALUES (?,?,?,?)""",(None,name,categoryData[0],hashed_image_path))
     except BaseException as err:
         print(f"Unexpected {err=}, {type(err)=}")
