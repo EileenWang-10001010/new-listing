@@ -5,7 +5,7 @@ import sqlite3
 import hashlib
 import io
 from PIL import ImageFilter
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import base64
 from fastapi import FastAPI, Form, HTTPException, UploadFile,File, BackgroundTasks
 from fastapi.responses import FileResponse
@@ -101,20 +101,17 @@ def get_by_id(item_id: int):
     except:
         return("This index has no related item. Please input another index.")
 
-def resize_image(filename: str):
+def resize_image(filename: str, discount: str):
 
     image = Image.open(filename, mode="r")
     # logger.info(type(image)) #<class 'PIL.JpegImagePlugin.JpegImageFile'>
     image = image.resize((256,256))
-    # image = image.filter(ImageFilter.EDGE_ENHANCE)
     image.save(filename)
 
 @app.post("/items")
 async def add_item(background_tasks: BackgroundTasks, name: str = Form(...), category: str = Form(...), price: str = Form(...), discount: str = Form(...),image: UploadFile = File(...)):
     conn = sqlite3.connect('mercari.sqlite3')
     c = conn.cursor()
-    # logger.info(price)
-    # logger.info(discount)
     try:
         c.execute("""SELECT * from category WHERE name == (?)""",[category])
         categoryData = c.fetchone()
@@ -131,7 +128,7 @@ async def add_item(background_tasks: BackgroundTasks, name: str = Form(...), cat
             file_object.close()
             logger.info({"info": f"file '{image.filename}' saved at '{file_location}'"})
 
-        background_tasks.add_task(resize_image, filename=file_location)
+        background_tasks.add_task(resize_image, filename=file_location, discount=discount)
 
         c.execute("""INSERT INTO items VALUES (?,?,?,?,?,?)""",(None,name,categoryData[0],str(price),str(discount),hashed_image_path))
     except BaseException as err:
