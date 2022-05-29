@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import internal from 'stream';
 
 const server = process.env.API_URL || 'http://127.0.0.1:9000';
 
 type formType = {
   name: string,
   category: string,
+  price: string,
+  discount: string,
   image:  File | string,
 }
 
@@ -12,6 +15,8 @@ export const Listing: React.FC<{}> = () => {
   const initialState = {
     name: "",
     category: "",
+    price: "",
+    discount: "",
     image: "",
   };
   
@@ -30,6 +35,8 @@ export const Listing: React.FC<{}> = () => {
     const data = new FormData()
     data.append('name', values.name)
     data.append('category', values.category)
+    data.append('price',values.price)
+    data.append('discount',values.discount)
     data.append('image', values.image)
 
     fetch(server.concat('/items'), {
@@ -52,6 +59,8 @@ export const Listing: React.FC<{}> = () => {
         <div>
             <input type='text' name='name' id='name' placeholder='name' onChange={onChange} required/>
             <input type='text' name='category' id='category' placeholder='category' onChange={onChange}/>
+            <input type='text' name='price' id='price' placeholder='price' onChange={onChange}/><span>¥ </span>
+            <input type='text' name='discount' id='discount' placeholder='discount' onChange={onChange}/><span>% off </span>
             <input type='file' name='image' id='image' placeholder='image' onChange={onFileChange}/>
             <button type='submit'>List this item</button>
         </div>

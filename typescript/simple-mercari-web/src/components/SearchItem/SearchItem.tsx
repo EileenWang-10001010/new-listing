@@ -4,6 +4,8 @@ interface Item {
   id: number;
   name: string;
   category: string;
+  price: string;
+  discount: string;
   image: string | File;
 };
 
@@ -59,6 +61,10 @@ export const SearchItem: React.FC<{}> = () => {
             <span >Name: {item.name}</span>
             <br/>
             <span>Category: {item.category}</span>
+            <br />
+            <span>price: {item.price} ¥</span>
+            <br />
+            <span>discount: {item.discount} % off</span>
             </p>
           </div>
         )
