@@ -44,7 +44,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS category (
 conn.commit()
 conn.close()
 
-sql = """SELECT items.name, category.name as category,items.price, items.discount, items.image
+sql = """SELECT items.id, items.name, category.name as category,items.price, items.discount, items.image
         FROM  items INNER JOIN category
         ON items.category_id =category.id
         """

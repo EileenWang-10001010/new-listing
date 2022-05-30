@@ -60,7 +60,7 @@ export const Listing: React.FC<{}> = () => {
             <input type='text' name='name' id='name' placeholder='name' onChange={onChange} required/>
             <input type='text' name='category' id='category' placeholder='category' onChange={onChange}/>
             <input type='text' name='price' id='price' placeholder='price' onChange={onChange}/><span>¥ </span>
-            <input type='text' name='discount' id='discount' placeholder='discount' onChange={onChange}/><span>% off </span>
+            <input type='text' name='discount' id='discount' placeholder='discount % off' onChange={onChange}/><span>% off </span>
             <input type='file' name='image' id='image' placeholder='image' onChange={onFileChange}/>
             <button type='submit'>List this item</button>
         </div>
