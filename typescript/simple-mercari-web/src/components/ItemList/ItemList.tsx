@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import internal from 'stream';
 
 interface Item {
   id: number;
   name: string;
   category: string;
+  price: string;
+  discount: string;
   image: string | File;
 };
 
@@ -26,7 +29,6 @@ export const ItemList: React.FC<{}> = () => {
       .then(response => response.json())
       .then(data => {
         console.log('GET success:',data.items);
-        console.log(process.env);
         setItems(data.items);
       })
       .catch(error => {
@@ -39,17 +41,23 @@ export const ItemList: React.FC<{}> = () => {
   }, []);
   
   return (
-    <div style={{ backgroundColor: '#222427' }}>
-      <h1>All items</h1>
+    <div style={{ backgroundColor: '#222427' }} className="block">
+      <h3>All items</h3>
       { items.map((item) => {
         return (
           <div key={item.id} className='ItemList' >
-            {/* TODO: Task 1: Replace the placeholder image with the item image */}
+            <div className='container'>
             <img  style={{ width: '50%' }} src={server.concat(`/image/${item.image}`)} alt={item.name} />
+            {Number(item.discount)>0? <div className='image'>{item.discount}%off</div> : <div/>}
+            </div>
             <p>
             <span >Name: {item.name}</span>
             <br/>
             <span>Category: {item.category}</span>
+            <br />
+            <span>price: {item.price} ¥</span>
+            <br />
+            {Number(item.discount)>0? <span>discount: {item.discount} % off</span> : <br/>}
             </p>
           </div>
         )

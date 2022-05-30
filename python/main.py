@@ -5,7 +5,7 @@ import sqlite3
 import hashlib
 import io
 from PIL import ImageFilter
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import base64
 from fastapi import FastAPI, Form, HTTPException, UploadFile,File, BackgroundTasks
 from fastapi.responses import FileResponse
@@ -31,6 +31,8 @@ c.execute("""CREATE TABLE IF NOT EXISTS items (
     id INTEGER PRIMARY KEY,
     name TEXT,
     category_id INTEGER,
+    price TEXT,
+    discount TEXT,
     image TEXT
 )""")
 
@@ -42,7 +44,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS category (
 conn.commit()
 conn.close()
 
-sql = """SELECT items.name,category.name as category,items.image
+sql = """SELECT items.name, category.name as category,items.price, items.discount, items.image
         FROM  items INNER JOIN category
         ON items.category_id =category.id
         """
@@ -62,13 +64,13 @@ async def get_all_items():
     c.execute(sql)
     r = [dict((c.description[i][0], value)
                   for i, value in enumerate(row)) for row in c.fetchall()]
+    logger.info(r)
     conn.close()
     
     return {"items":r}
 
 @app.get("/search")
 async def search_items(keyword: str):
-    
     conn = sqlite3.connect('mercari.sqlite3')
     c = conn.cursor()
     # Inner JOIN is advised by yuting0203 and reference to LingYi0612
@@ -94,24 +96,22 @@ def get_by_id(item_id: int):
     conn.close()
     try:
         if(len(item)):
-            r = {f"name:{item[0]} category:{item[1]} image:{item[2]}"}
+            r = {f"name:{item[0]} category:{item[1]} price:{item[2]} discount:{item[3]}image:{item[4]}"}
             return(f"{r}")
     except:
         return("This index has no related item. Please input another index.")
 
-def resize_image(filename: str):
+def resize_image(filename: str, discount: str):
 
     image = Image.open(filename, mode="r")
     # logger.info(type(image)) #<class 'PIL.JpegImagePlugin.JpegImageFile'>
     image = image.resize((256,256))
-    # image = image.filter(ImageFilter.EDGE_ENHANCE)
     image.save(filename)
 
 @app.post("/items")
-async def add_item(background_tasks: BackgroundTasks, name: str = Form(...), category: str = Form(...), image: UploadFile = File(...)):
+async def add_item(background_tasks: BackgroundTasks, name: str = Form(...), category: str = Form(...), price: str = Form(...), discount: str = Form(...),image: UploadFile = File(...)):
     conn = sqlite3.connect('mercari.sqlite3')
     c = conn.cursor()
-    
     try:
         c.execute("""SELECT * from category WHERE name == (?)""",[category])
         categoryData = c.fetchone()
@@ -128,9 +128,9 @@ async def add_item(background_tasks: BackgroundTasks, name: str = Form(...), cat
             file_object.close()
             logger.info({"info": f"file '{image.filename}' saved at '{file_location}'"})
 
-        background_tasks.add_task(resize_image, filename=file_location)
+        background_tasks.add_task(resize_image, filename=file_location, discount=discount)
 
-        c.execute("""INSERT INTO items VALUES (?,?,?,?)""",(None,name,categoryData[0],hashed_image_path))
+        c.execute("""INSERT INTO items VALUES (?,?,?,?,?,?)""",(None,name,categoryData[0],str(price),str(discount),hashed_image_path))
     except BaseException as err:
         print(f"Unexpected {err=}, {type(err)=}")
     

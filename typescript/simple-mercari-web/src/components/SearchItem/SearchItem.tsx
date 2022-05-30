@@ -4,6 +4,8 @@ interface Item {
   id: number;
   name: string;
   category: string;
+  price: string;
+  discount: string;
   image: string | File;
 };
 
@@ -43,8 +45,8 @@ export const SearchItem: React.FC<{}> = () => {
   }
   
   return (
-    <div style={{ backgroundColor: '#222427' }}>
-        <h1>Search items</h1>
+    <div style={{ backgroundColor: '#222427' }} className="block">
+        <h3>Search items</h3>
         <form onSubmit={onSubmit}>
         <div>
             <input type='text' name='keyword' id='keyword' placeholder='search with item name or category keyword' onChange={onChange} required/> 
@@ -54,11 +56,18 @@ export const SearchItem: React.FC<{}> = () => {
       { items.map((item) => {
         return (
           <div key={item.id} className='ItemList' >
+            <div className='container'>
             <img  style={{ width: '50%' }} src={server.concat(`/image/${item.image}`)} alt={item.name} />
+            {Number(item.discount)>0? <div className='image'>{item.discount}%off</div> : <div/>}
+            </div>
             <p>
             <span >Name: {item.name}</span>
             <br/>
             <span>Category: {item.category}</span>
+            <br />
+            <span>price: {item.price} ¥</span>
+            <br />
+            {Number(item.discount)>0? <span>discount: {item.discount} % off</span> : <br/>}
             </p>
           </div>
         )
