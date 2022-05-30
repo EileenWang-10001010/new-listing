@@ -14,45 +14,27 @@ const server = process.env.API_URL || 'http://127.0.0.1:9000';
 
 const placeholderImage = process.env.PUBLIC_URL + '/logo192.png';
 
-
-
 export const ItemList: React.FC<{}> = () => {
   const [items, setItems] = useState<Item[]>([])
+  const [itemCopy, setItemCopy] = useState<Item[]>([])
   const [group, setGroup] = useState("Id")
-  
 
-  const returnBlock = () =>{
-    console.log(items) // object
-     items.map((item) => {
-      return (
-        <div key={item.id} className='ItemList' >
-           <div className='container'>
-             <img  style={{ width: '50%' }} src={server.concat(`/image/${item.image}`)} alt={item.name} />
-             {Number(item.discount)>0? <div className='image'>{item.discount}%off</div> : <div/>}
-           </div>
-             <p>
-             <span >Name: {item.name}</span>
-             <br/>
-             <span>Category: {item.category}</span>
-             <br />
-             <span>price: {item.price} ¥</span>
-             <br />
-             {Number(item.discount)>0? <span>discount: {item.discount} % off</span> : <br/>}
-             </p>
-        </div>
-      )
-    })
-  }
   const GroupById = () =>{
+    fetchItems();
     setGroup("Id");
   }
-  const GroupByDiscount = () =>{
+  const GroupByDiscount = async () =>{
+    await setItemCopy((itemCopy.filter(item => Number(item.discount)>0)).sort(function (a,b){return Number(b.discount) - Number(a.discount)}));
     setGroup("Discount");
-    setItems(items.filter(item => Number(item.discount)>0));
   }
-  const GroupByCategory = () =>{
+  const GroupByCategory = async () =>{
+    await setItemCopy(itemCopy.sort(function (a,b){
+      var categoryA = a.category.toUpperCase(); // ignore upper and lowercase
+      var categoryB = b.category.toUpperCase(); // ignore upper and lowercase
+      if (categoryA < categoryB) return -1;
+      if (categoryA > categoryB) return 1;
+      return 0;}));
     setGroup("Category");
-    setItems(items.sort());
   }
   const fetchItems = () => {
     fetch(server.concat('/items'),
@@ -68,15 +50,18 @@ export const ItemList: React.FC<{}> = () => {
       .then(data => {
         console.log('GET success:',data.items);
         setItems(data.items);
+        setItemCopy(data.items);
       })
       .catch(error => {
         console.error('GET error:',error)
       })
   }
-
+  useEffect(()=>{
+  },[group])
   useEffect(() => {
     fetchItems();
-  }, [group]);
+  }, []);
+
   
   return (
     <div style={{ backgroundColor: '#222427' }} className="block">
@@ -86,10 +71,9 @@ export const ItemList: React.FC<{}> = () => {
       <button onClick={()=>{GroupByCategory();console.log(group)}}>similar item</button> 
       <button onClick={()=>{GroupById();console.log(group)}}>index list</button>
       </p>
-    
       {console.log(items)}
 
-      {items.map((item) => {
+      {itemCopy.map((item) => {
         return (
           <div key={item.id} className='ItemList' >
              <div className='container'>
