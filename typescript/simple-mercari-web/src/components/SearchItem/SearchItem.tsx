@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import Button from '@mui/material/Button';
+import Input from '@mui/material/Input';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface Item {
   id: number;
@@ -45,17 +48,19 @@ export const SearchItem: React.FC<{}> = () => {
   }
   
   return (
-    <div style={{ backgroundColor: '#222427' }} className="block">
+    <div style={{ backgroundColor: "Cornsilk" }} >
         <h3>Search items</h3>
         <form onSubmit={onSubmit}>
+        
         <div>
-            <input type='text' name='keyword' id='keyword' placeholder='search with item name or category keyword' onChange={onChange} required/> 
-            <button type='submit'>search</button>
+            <SearchIcon />
+            <Input type='text' name='keyword' id='keyword' placeholder='search with item name or category keyword' onChange={onChange} required/> 
+            <Button  type='submit'>search</Button>
         </div>
       </form>
       { items.map((item) => {
         return (
-          <div key={item.id} className='ItemList' >
+          <div key={item.id} className='Search' >
             <div className='container'>
             <img  style={{ width: '50%' }} src={server.concat(`/image/${item.image}`)} alt={item.name} />
             {Number(item.discount)>0? <div className='image'>{item.discount}%off</div> : <div/>}

@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import Button from '@mui/material/Button';
+import SendIcon from '@mui/icons-material/Send'
+import TextField from '@mui/material/TextField'
 import internal from 'stream';
 
 const server = process.env.API_URL || 'http://127.0.0.1:9000';
@@ -12,6 +15,8 @@ type formType = {
 }
 
 export const Listing: React.FC<{}> = () => {
+  const bodyRef = useRef<HTMLInputElement>(null);
+
   const initialState = {
     name: "",
     category: "",
@@ -53,16 +58,28 @@ export const Listing: React.FC<{}> = () => {
       console.error('POST error:', error);
     })
   };
+  useEffect(() => {
+    bodyRef.current!.focus();
+  },[]);
+
+
   return (
     <div className='Listing'>
       <form onSubmit={onSubmit}>
         <div>
-            <input type='text' name='name' id='name' placeholder='name' onChange={onChange} required/>
-            <input type='text' name='category' id='category' placeholder='category' onChange={onChange}/>
-            <input type='text' name='price' id='price' placeholder='price' onChange={onChange}/><span>¥ </span>
-            <input type='text' name='discount' id='discount' placeholder='discount' onChange={onChange}/><span>% off </span>
-            <input type='file' name='image' id='image' placeholder='image' onChange={onFileChange}/>
-            <button type='submit'>List this item</button>
+            <TextField  
+
+            size="small" type='text' name='name' id='name' placeholder='name' onChange={onChange} />
+            <TextField  
+            onKeyDown={(e) =>
+              {if(e.key==='Enter'){
+                bodyRef.current!.focus();
+              }}}
+            size="small" type='text' name='category' id='category' placeholder='category' onChange={onChange} />
+            <TextField  inputRef = {bodyRef} size="small" type='text' name='price' id='price' placeholder='price ¥ ' onChange={onChange} />
+            <TextField  size="small" type='text' name='discount' id='discount' placeholder='discount % off' onChange={onChange} />
+            <TextField  size="small" type='file' name='image' id='image' placeholder='image' onChange={onFileChange}/>
+            <Button  endIcon={<SendIcon />} type='submit' >List this item</Button>
         </div>
       </form>
     </div>
