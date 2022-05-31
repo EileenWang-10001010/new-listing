@@ -46,6 +46,16 @@
   left: 20%;
   transform: rotate(-45deg);
 }
+.Search{
+  display: inline-block;
+  margin: none;
+  padding: none;
+  min-height: 8vh;
+  max-width: 25%;
+  flex-direction: row;
+  font-size: calc(10px + 1vmin);
+  color: rgb(84, 83, 83);
+}
 .ItemList {
   background-color: #222427;
   display: inline-block;

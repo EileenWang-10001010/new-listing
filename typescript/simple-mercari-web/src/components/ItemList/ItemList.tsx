@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+// import styled from "styled-components"
+import Button from '@mui/material/Button';
 import internal from 'stream';
 
 interface Item {
@@ -67,9 +69,9 @@ export const ItemList: React.FC<{}> = () => {
     <div style={{ backgroundColor: '#222427' }} className="block">
       <h3>All items</h3> 
       <p>
-      <button onClick={()=>{GroupByDiscount();console.log(group)}}>discount list</button> 
-      <button onClick={()=>{GroupByCategory();console.log(group)}}>similar item</button> 
-      <button onClick={()=>{GroupById();console.log(group)}}>index list</button>
+      <Button variant="outlined" onClick={()=>{GroupByDiscount();console.log(group)}}>discount list</Button> 
+      <Button variant="outlined" onClick={()=>{GroupByCategory();console.log(group)}}>similar item</Button> 
+      <Button variant="outlined" onClick={()=>{GroupById();console.log(group)}}>index list</Button>
       </p>
       {console.log(items)}
 
